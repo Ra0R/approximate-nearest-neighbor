@@ -8,6 +8,7 @@ Golang implementation of approximate nearest neighbor based on navigable small w
 
 - [x] Basic interfaces
 - [ ] Add more unit tests
+- [ ] Create/Find example data set
 
 ### Lab 5
 
