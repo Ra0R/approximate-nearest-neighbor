@@ -9,7 +9,8 @@ import (
 func TestNewGraph(t *testing.T) {
 	assert := assert.New(t)
 	factory := GraphFactory{}
-	graph, err := factory.New()
+	path := "."
+	graph, err := factory.New(path)
 
 	assert.NoError(err)
 	assert.NotNil(graph)
@@ -31,7 +32,8 @@ func TestClose(t *testing.T) {
 	assert := assert.New(t)
 
 	factory := GraphFactory{}
-	graph, err := factory.New()
+	path := "."
+	graph, err := factory.New(path)
 
 	assert.NoError(err)
 	assert.NotNil(graph)
@@ -53,7 +55,8 @@ func TestOpen_NoPath_Fails(t *testing.T) {
 func TestInsertionOnEmptyGraph(t *testing.T) {
 	assert := assert.New(t)
 	factory := GraphFactory{}
-	graph, err := factory.New()
+	path := "."
+	graph, err := factory.New(path)
 	assert.NoError(err)
 	assert.NotNil(graph)
 
@@ -74,7 +77,8 @@ func TestInsertionOnEmptyGraph(t *testing.T) {
 func TestGetNearestNeighbor(t *testing.T) {
 	assert := assert.New(t)
 	factory := GraphFactory{}
-	graph, err := factory.New()
+	path := "."
+	graph, err := factory.New(path)
 	assert.NoError(err)
 	assert.NotNil(graph)
 
@@ -111,7 +115,8 @@ func TestGetNearestNeighbor(t *testing.T) {
 func TestGetNearestNeighbors(t *testing.T) {
 	assert := assert.New(t)
 	factory := GraphFactory{}
-	graph, err := factory.New()
+	path := "."
+	graph, err := factory.New(path)
 	assert.NoError(err)
 	assert.NotNil(graph)
 

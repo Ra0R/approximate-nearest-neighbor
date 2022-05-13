@@ -14,7 +14,7 @@ type GraphInterface interface {
 
 	// Search for the approximate k nearest neighbours of the object in the graph.
 	// m is the number of multi searches being performed.
-	NNSearch(object ObjectInterface, m uint16, k uint16) ([]ObjectInterface, error)
+	NNSearch(object ObjectInterface, m uint16, k uint16) ([]*ObjectInterface, error)
 
 	// Insert a new object into the graph.
 	// The new object will be linked to the f approximate nearest neighbours.
