@@ -96,17 +96,19 @@ func TestGetNearestNeighbor(t *testing.T) {
 	point2, err := NewPoint(dimension, []float64{1.0})
 	assert.NoError(err)
 	err = graph.NNInsert(point2, 3, 1)
+	assert.NoError(err)
 
 	// Insert Point3 = (2.0)
 	point3, err := NewPoint(dimension, []float64{2.0})
 	assert.NoError(err)
 	err = graph.NNInsert(point3, 3, 1)
+	assert.NoError(err)
 
 	// Search nearest point of Point1, should return Point2 (assuming Euclidean metric)
 	nearestNeighbors, err := graph.NNSearch(point1, 3, 1)
 	assert.NoError(err)
 	assert.NotNil(nearestNeighbors)
-	assert.Equal(nearestNeighbors[0], point2)
+	assert.Equal(point2, nearestNeighbors[0])
 
 	err = graph.Close()
 	assert.NoError(err)

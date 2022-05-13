@@ -29,14 +29,14 @@ func NewPoint(dimension uint16, coordinates []float64) (*EuclidianPoint, error) 
 	return point, nil
 }
 
-func (p EuclidianPoint) calculateDistance(object ObjectInterface) (float64, error) {
-	other, ok := object.(EuclidianPoint)
+func (p EuclidianPoint) calculateDistance(object *ObjectInterface) float64 {
+	other, ok := (*object).(*EuclidianPoint)
 	if !ok {
-		return 0, errors.New("unable to calculate distance to object that is not a EuclidianPoint")
+		panic("unable to calculate distance to object that is not a EuclidianPoint")
 	}
 
 	if other.dimension != p.dimension {
-		return 0, errors.New("unable to calculate distance between points of different dimension")
+		panic("unable to calculate distance between points of different dimension")
 	}
 
 	var distance float64 = 0
@@ -44,5 +44,5 @@ func (p EuclidianPoint) calculateDistance(object ObjectInterface) (float64, erro
 		distance += math.Sqrt(math.Pow(other.coordinates[i]-p.coordinates[i], 2))
 	}
 
-	return distance, nil
+	return distance
 }

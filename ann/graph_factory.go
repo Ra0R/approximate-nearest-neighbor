@@ -4,7 +4,7 @@ import "errors"
 
 var (
 	// ErrInvalidPath is returned when the path that has been given is not valid (inexistent/not writable)
-	ErrInvalidPath = errors.New("Supplied argument 'path' is not valid")
+	ErrInvalidPath = errors.New("supplied argument 'path' is not valid")
 )
 
 type GraphFactory struct {

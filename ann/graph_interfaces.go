@@ -29,6 +29,6 @@ type GraphInterface interface {
 type ObjectInterface interface {
 
 	// Get distance between this object and another.
-	// Different implementations of ObjectInterface might not be compatible and throw an error.
-	calculateDistance(object ObjectInterface) (float64, error)
+	// Different implementations of ObjectInterface might not be compatible and panic.
+	calculateDistance(object *ObjectInterface) float64
 }
