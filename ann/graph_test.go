@@ -9,7 +9,8 @@ import (
 func TestNewGraph(t *testing.T) {
 	assert := assert.New(t)
 	factory := GraphFactory{}
-	graph, err := factory.New()
+	path := "."
+	graph, err := factory.New(path)
 
 	assert.NoError(err)
 	assert.NotNil(graph)
@@ -31,7 +32,8 @@ func TestClose(t *testing.T) {
 	assert := assert.New(t)
 
 	factory := GraphFactory{}
-	graph, err := factory.New()
+	path := "."
+	graph, err := factory.New(path)
 
 	assert.NoError(err)
 	assert.NotNil(graph)
@@ -53,7 +55,8 @@ func TestOpen_NoPath_Fails(t *testing.T) {
 func TestInsertionOnEmptyGraph(t *testing.T) {
 	assert := assert.New(t)
 	factory := GraphFactory{}
-	graph, err := factory.New()
+	path := "."
+	graph, err := factory.New(path)
 	assert.NoError(err)
 	assert.NotNil(graph)
 
@@ -74,7 +77,8 @@ func TestInsertionOnEmptyGraph(t *testing.T) {
 func TestGetNearestNeighbor(t *testing.T) {
 	assert := assert.New(t)
 	factory := GraphFactory{}
-	graph, err := factory.New()
+	path := "."
+	graph, err := factory.New(path)
 	assert.NoError(err)
 	assert.NotNil(graph)
 
@@ -92,17 +96,19 @@ func TestGetNearestNeighbor(t *testing.T) {
 	point2, err := NewPoint(dimension, []float64{1.0})
 	assert.NoError(err)
 	err = graph.NNInsert(point2, 3, 1)
+	assert.NoError(err)
 
 	// Insert Point3 = (2.0)
 	point3, err := NewPoint(dimension, []float64{2.0})
 	assert.NoError(err)
 	err = graph.NNInsert(point3, 3, 1)
+	assert.NoError(err)
 
 	// Search nearest point of Point1, should return Point2 (assuming Euclidean metric)
 	nearestNeighbors, err := graph.NNSearch(point1, 3, 1)
 	assert.NoError(err)
 	assert.NotNil(nearestNeighbors)
-	assert.Equal(nearestNeighbors[0], point2)
+	assert.Equal(point2, nearestNeighbors[0])
 
 	err = graph.Close()
 	assert.NoError(err)
@@ -111,7 +117,8 @@ func TestGetNearestNeighbor(t *testing.T) {
 func TestGetNearestNeighbors(t *testing.T) {
 	assert := assert.New(t)
 	factory := GraphFactory{}
-	graph, err := factory.New()
+	path := "."
+	graph, err := factory.New(path)
 	assert.NoError(err)
 	assert.NotNil(graph)
 
