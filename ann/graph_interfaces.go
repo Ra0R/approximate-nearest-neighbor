@@ -23,6 +23,8 @@ type GraphInterface interface {
 
 	// Saves graph to disk and frees memory
 	Close() error
+
+	String()
 }
 
 // the interface for the object to store in the graph

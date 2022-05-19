@@ -11,7 +11,7 @@ func (c *VertexComparator) compare(a, b interface{}) int {
 	if !ok {
 		panic("unable to compare non vertex object")
 	}
-	w, ok := a.(*Vertex)
+	w, ok := b.(*Vertex)
 	if !ok {
 		panic("unable to compare non vertex object")
 	}
