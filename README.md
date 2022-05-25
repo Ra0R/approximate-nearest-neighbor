@@ -21,7 +21,7 @@ Offers a nice data set which contains n=200, 14 dimensional points.
 ### Lab 5
 
 - [x] In memory implemention of graph
-- [ ] Testing with large data set
+- [x] Testing with large data set
 
 ### Lab 6
 
