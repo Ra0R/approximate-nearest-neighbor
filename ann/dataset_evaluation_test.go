@@ -87,6 +87,17 @@ func (lhs *EuclidianPoint) distance(rhs *EuclidianPoint) float64 {
 
 	return distance
 }
+func findPointByName(dataset []EuclidianPoint, name string) int {
+	r := -1
+
+	for j := range dataset {
+		if dataset[j].name == name {
+			return j
+		}
+	}
+
+	return r
+}
 
 func findPointByCoordinates(dataset []EuclidianPoint, coordinates []float64) int {
 	r := -1
@@ -210,13 +221,11 @@ func TestCalculateRecallAccuracyConfusionMatrix(t *testing.T) {
 
 	mat := mlmetrics.NewConfusionMatrix()
 	for i := range test_nearest_neighbors {
-		fmt.Println("Nearest neighbors for ", i)
 		for j := range test_nearest_neighbors[i] {
-			// Very slow
 			if len(predictionsO[i]) <= j {
 				continue
 			}
-			x := findPointByCoordinates(dataset, predictionsO[i][j].(EuclidianPoint).coordinates)
+			x := findPointByName(dataset, predictionsO[i][j].(EuclidianPoint).name)
 			mat.Observe(test_nearest_neighbors[i][j].nodeId, x)
 		}
 		if i > 0 && i%100 == 0 {
@@ -235,11 +244,3 @@ func TestCalculateRecallAccuracyConfusionMatrix(t *testing.T) {
 	fmt.Printf("kappa    : %.3f\n", mat.Kappa())
 	fmt.Printf("matthews : %.3f\n", mat.Matthews())
 }
-
-/*
-func TestOpsPerSec(t *testing.T) {
-	assert := assert.New(t)
-	dataset := loadDataset("data.csv", true)
-
-}
-*/
