@@ -7,6 +7,9 @@ type GraphFactoryInterface interface {
 
 	// Loads graph from disk into memory
 	Open(path string) (*GraphInterface, error)
+
+	//  Delete existing graph
+	Delete(path string) error
 }
 
 // the interface for the graph
@@ -23,12 +26,14 @@ type GraphInterface interface {
 
 	// Saves graph to disk and frees memory
 	Close() error
+
+	String()
 }
 
 // the interface for the object to store in the graph
 type ObjectInterface interface {
 
-	// Get distance between this object and another.
-	// Different implementations of ObjectInterface might not be compatible and panic.
+	// // Get distance between this object and another.
+	// // Different implementations of ObjectInterface might not be compatible and panic.
 	calculateDistance(object *ObjectInterface) float64
 }

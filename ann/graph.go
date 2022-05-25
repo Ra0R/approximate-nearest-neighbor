@@ -1,13 +1,17 @@
 package ann
 
 import (
+	"encoding/gob"
 	"fmt"
 	"math/rand"
+	"os"
+	"strconv"
 
 	"github.com/emirpasic/gods/sets/treeset"
 )
 
 type Graph struct {
+	Path         string
 	nextVertexId uint64
 	vertices     map[uint64]*Vertex
 	edges        map[uint64][]*Edge
@@ -118,10 +122,10 @@ func (g *Graph) internalSearch(q *Vertex, m uint16, k uint16) ([]*Vertex, error)
 // Returns a random uint64 in [0, nextVertexId)
 func (g *Graph) getRandomVertexId() uint64 {
 	max := int64(g.nextVertexId)
-	if max >= 0 {
+	if max > 0 {
 		return uint64(rand.Int63n(max))
 	} else {
-		return rand.Uint64()
+		return 0
 	}
 }
 
@@ -149,6 +153,26 @@ func (g *Graph) getFriends(vertexId uint64) ([]*Vertex, error) {
 	return result, nil
 }
 
+func (g *Graph) addEdge(v, w uint64) {
+	e := &Edge{
+		v: v,
+		w: w,
+	}
+
+	g.edges[v] = append(g.edges[v], e)
+
+	e2 := &Edge{
+		v: w,
+		w: v,
+	}
+	g.edges[w] = append(g.edges[w], e2)
+}
+
+func (g *Graph) addVertex(vertex *Vertex) {
+	g.vertices[vertex.id] = vertex
+	g.nextVertexId++
+}
+
 func (g *Graph) NNInsert(object ObjectInterface, f uint16, w uint16) error {
 	v := &Vertex{
 		id:     g.nextVertexId,
@@ -157,14 +181,18 @@ func (g *Graph) NNInsert(object ObjectInterface, f uint16, w uint16) error {
 
 	g.edges[v.id] = make([]*Edge, 0)
 
+	// Empty Graph
+	if g.nextVertexId == 0 {
+		g.addVertex(v)
+		return nil
+	}
+
 	if v.id <= uint64(f) {
-		for i := 0; i < int(f); i++ {
-			e := &Edge{
-				v: v.id,
-				w: uint64(i),
+		// Connect previous nodes to newly inserted node
+		for i := uint64(0); i < v.id; i++ {
+			if v.id != i { // Do not add reflexiv edges
+				g.addEdge(v.id, uint64(i))
 			}
-			g.edges[v.id] = append(g.edges[v.id], e)
-			g.edges[uint64(i)] = append(g.edges[uint64(i)], e)
 		}
 	} else {
 		nearestVertices, err := g.internalSearch(v, w, f)
@@ -173,24 +201,26 @@ func (g *Graph) NNInsert(object ObjectInterface, f uint16, w uint16) error {
 		}
 
 		for _, w := range nearestVertices {
-			e := &Edge{
-				v: v.id,
-				w: w.id,
-			}
-			g.edges[v.id] = append(g.edges[v.id], e)
-			g.edges[w.id] = append(g.edges[w.id], e)
+			g.addEdge(v.id, w.id)
 		}
 	}
 
-	g.vertices[v.id] = v
-	g.nextVertexId++
+	g.addVertex(v)
 
 	return nil
 }
 
 func (g *Graph) Close() error {
-	// TODO: implement this
-	return nil
+	file, err := os.OpenFile(g.Path, os.O_RDWR, 0644)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+
+	encoder := gob.NewEncoder(file)
+	err = encoder.Encode(*g)
+
+	return err
 }
 
 func (g *Graph) getVertex(id uint64) (*Vertex, error) {
@@ -203,4 +233,18 @@ func (g *Graph) getVertex(id uint64) (*Vertex, error) {
 
 func (v *Vertex) calculateDistance(w *Vertex) float64 {
 	return (*v.object).calculateDistance(w.object)
+}
+
+func (g *Graph) String() {
+	s := ""
+	for i := 0; i < len(g.vertices); i++ {
+		s += "Vertice " + strconv.FormatUint(g.vertices[uint64(i)].id, 10)
+		s += " -> "
+		near := g.edges[g.vertices[uint64(i)].id]
+		for j := 0; j < len(near); j++ {
+			s += strconv.FormatUint(near[j].w, 10) + " "
+		}
+		s += "\n"
+	}
+	fmt.Println(s)
 }
