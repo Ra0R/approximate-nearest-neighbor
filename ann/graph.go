@@ -64,6 +64,7 @@ func (g *Graph) internalSearch(q *Vertex, m uint16, k uint16) ([]*Vertex, error)
 			return nil, err
 		}
 
+		candidates.Clear()
 		candidates.Add(r)
 		tempRes.Clear()
 		// repeat
@@ -75,16 +76,14 @@ func (g *Graph) internalSearch(q *Vertex, m uint16, k uint16) ([]*Vertex, error)
 			iter := candidates.Iterator()
 			iter.First()
 			c := iter.Value().(*Vertex)
-			// remove c from candiadates
+			// remove c from candidates
 			candidates.Remove(c)
 
 			// check stop condition
 			// if c is further than k-th element from result, then break repeat
-			if result.Size() == int(k) {
-				iter = result.Iterator()
-				iter.Last()
-				furthestResult := iter.Value().(*Vertex)
-				if q.calculateDistance(c) > q.calculateDistance(furthestResult) {
+			if tempRes.Size() >= int(k) {
+				kthResult := tempRes.Values()[k-1].(*Vertex)
+				if q.calculateDistance(c) > q.calculateDistance(kthResult) {
 					break
 				}
 			}
@@ -103,7 +102,10 @@ func (g *Graph) internalSearch(q *Vertex, m uint16, k uint16) ([]*Vertex, error)
 			}
 		}
 
-		for _, r := range tempRes.Values() {
+		for j, r := range tempRes.Values() {
+			if j > int(k) {
+				break
+			}
 			result.Add(r)
 		}
 	}
