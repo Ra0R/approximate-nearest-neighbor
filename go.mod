@@ -5,6 +5,7 @@ go 1.17
 require github.com/stretchr/testify v1.7.1
 
 require (
+	github.com/bsm/mlmetrics v0.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/google/go-cmp v0.4.0 // indirect

@@ -20,7 +20,7 @@ Offers a nice data set which contains n=200, 14 dimensional points.
 
 ### Lab 5
 
-- [ ] In memory implemention of graph
+- [x] In memory implemention of graph
 - [ ] Testing with large data set
 
 ### Lab 6

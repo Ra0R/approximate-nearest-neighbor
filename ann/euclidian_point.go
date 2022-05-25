@@ -6,6 +6,7 @@ import (
 )
 
 type EuclidianPoint struct {
+	name        string
 	dimension   uint16
 	coordinates []float64
 }
@@ -30,7 +31,17 @@ func NewPoint(dimension uint16, coordinates []float64) (*EuclidianPoint, error) 
 }
 
 func (p EuclidianPoint) calculateDistance(object *ObjectInterface) float64 {
-	other, ok := (*object).(*EuclidianPoint)
+	var other *EuclidianPoint
+	var ok bool = true
+
+	switch (*object).(type) {
+	case EuclidianPoint:
+		obj := (*object).(EuclidianPoint)
+		other = &obj
+	case ObjectInterface:
+		other, ok = (*object).(*EuclidianPoint)
+	}
+
 	if !ok {
 		panic("unable to calculate distance to object that is not a EuclidianPoint")
 	}

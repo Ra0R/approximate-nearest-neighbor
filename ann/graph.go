@@ -1,14 +1,17 @@
 package ann
 
 import (
+	"encoding/gob"
 	"fmt"
 	"math/rand"
+	"os"
 	"strconv"
 
 	"github.com/emirpasic/gods/sets/treeset"
 )
 
 type Graph struct {
+	Path         string
 	nextVertexId uint64
 	vertices     map[uint64]*Vertex
 	edges        map[uint64][]*Edge
@@ -208,8 +211,16 @@ func (g *Graph) NNInsert(object ObjectInterface, f uint16, w uint16) error {
 }
 
 func (g *Graph) Close() error {
-	// TODO: implement this
-	return nil
+	file, err := os.OpenFile(g.Path, os.O_RDWR, 0644)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+
+	encoder := gob.NewEncoder(file)
+	err = encoder.Encode(*g)
+
+	return err
 }
 
 func (g *Graph) getVertex(id uint64) (*Vertex, error) {
