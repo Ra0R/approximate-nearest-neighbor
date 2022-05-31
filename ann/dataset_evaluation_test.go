@@ -14,7 +14,6 @@ import (
 
 	"github.com/bsm/mlmetrics"
 	"github.com/stretchr/testify/assert"
-	"gonum.org/v1/gonum/floats"
 )
 
 func loadDataset(filePath string, skipHeader bool, nameRow int, coordinateStart int, coordinatesEnd int, delimiter rune) []EuclidianPoint {
@@ -99,19 +98,7 @@ func findPointByName(dataset []EuclidianPoint, name string) int {
 	return r
 }
 
-func findPointByCoordinates(dataset []EuclidianPoint, coordinates []float64) int {
-	r := -1
-
-	for j := range dataset {
-		if floats.Equal(dataset[j].coordinates, coordinates) {
-			r = j
-			break
-		}
-	}
-
-	return r
-}
-
+// Might need to increase test parameter "-timout" > 30s, when running test
 func TestInsertDatasetIntoGraph(t *testing.T) {
 	assert := assert.New(t)
 
@@ -149,8 +136,9 @@ func TestCalculateRecallAccuracyConfusionMatrix(t *testing.T) {
 
 	// Insertion parameters
 	const f uint16 = 4
-	const w uint16 = 2
+	const w uint16 = 3
 
+	var m uint16 = w
 	assert := assert.New(t)
 	//dataset := loadDataset("data.csv", true, -1, 0, 14, ',')
 	dataset := loadDataset("data_ch.csv", false, 2, 9, 11, ';')
@@ -197,7 +185,6 @@ func TestCalculateRecallAccuracyConfusionMatrix(t *testing.T) {
 	}
 
 	// Evaluate nearest neighbors (ids)
-	var m uint16 = 2
 	predictionsO := make(map[int][]ObjectInterface)
 	for j, point := range dataset {
 
@@ -241,6 +228,94 @@ func TestCalculateRecallAccuracyConfusionMatrix(t *testing.T) {
 	// print metrics
 	fmt.Println()
 	fmt.Printf("accuracy : %.3f\n", mat.Accuracy())
-	fmt.Printf("kappa    : %.3f\n", mat.Kappa())
-	fmt.Printf("matthews : %.3f\n", mat.Matthews())
+}
+
+// Method used to create to graph for the presentation
+func TestCalculateRecallAccuracyConfusionMatrix_Presentation(t *testing.T) {
+
+	assert := assert.New(t)
+
+	var testsetW = [4]uint16{1, 2, 3, 4}
+	var testsetF = [7]uint16{4, 5, 6, 7, 8, 9, 10}
+	var results = [7][4]float64{}
+
+	const k uint16 = 10 // Evaluate on k nearest neighbors
+	dataset := loadDataset("data_ch.csv", false, 2, 9, 11, ';')
+	fmt.Println("Lenght of dataset ", len(dataset))
+
+	// Calculate distance from every point to every point
+	// and store k nearest neighbors
+	test_nearest_neighbors := make(map[int][]neighbor)
+	for i, point1 := range dataset {
+
+		// Calculate distances to all points
+		var distances []neighbor
+
+		for j, point2 := range dataset {
+			distances = append(distances, neighbor{j, point1.distance(&point2)})
+		}
+
+		// Sort by distance
+		sort.Slice(distances, func(i, j int) bool {
+			return distances[i].distance < distances[j].distance
+		})
+
+		// Take first k
+		test_nearest_neighbors[i] = distances[:k]
+	}
+
+	for w_i := range testsetW {
+		m := testsetW[w_i]
+		w := testsetW[w_i]
+		for f_i := range testsetF {
+			f := testsetF[f_i]
+			// Setup Graph
+			factory := GraphFactory{}
+			path := "."
+			graph, err := factory.New(path)
+			assert.NoError(err)
+			assert.NotNil(graph)
+
+			for j := range rand.Perm(len(dataset)) {
+				point := dataset[j]
+				graph.NNInsert(point, f, w)
+
+			}
+
+			// Evaluate nearest neighbors (ids)
+
+			predictionsO := make(map[int][]ObjectInterface)
+			for j, point := range dataset {
+
+				preds, _ := graph.NNSearch(point, m, k)
+
+				var predO []ObjectInterface
+				for _, pred := range preds {
+					if pred != nil {
+						predO = append(predO, *pred)
+					} else {
+						assert.Fail("Unable to get k approximate nearest neighbors")
+					}
+				}
+				predictionsO[j] = predO
+				if j > 0 && j%100 == 0 {
+					fmt.Println("Got " + strconv.Itoa(j) + " predictions")
+				}
+			}
+
+			mat := mlmetrics.NewConfusionMatrix()
+			for i := range test_nearest_neighbors {
+				for j := range test_nearest_neighbors[i] {
+					if len(predictionsO[i]) <= j {
+						continue
+					}
+					x := findPointByName(dataset, predictionsO[i][j].(EuclidianPoint).name)
+					mat.Observe(test_nearest_neighbors[i][j].nodeId, x)
+				}
+			}
+
+			results[f_i][w_i] = mat.Accuracy()
+		}
+	}
+	fmt.Println(results)
 }
