@@ -46,9 +46,8 @@ func loadDataset(filePath string, skipHeader bool, nameRow int, coordinateStart 
 
 		name := ""
 		for j, s := range rec {
-			if j == nameRow {
-				name = s
-			}
+			name += s
+
 			if j < coordinateStart || j >= coordinatesEnd {
 				continue
 			}
@@ -235,8 +234,8 @@ func TestCalculateRecallAccuracyConfusionMatrix_Presentation(t *testing.T) {
 
 	assert := assert.New(t)
 
-	var testsetW = [4]uint16{1, 2, 3, 4}
-	var testsetF = [7]uint16{4, 5, 6, 7, 8, 9, 10}
+	var testsetW = [4]uint16{2, 3, 4}
+	var testsetF = [7]uint16{10, 11, 12, 13, 14, 16, 17}
 	var results = [7][4]float64{}
 
 	const k uint16 = 10 // Evaluate on k nearest neighbors
@@ -312,6 +311,8 @@ func TestCalculateRecallAccuracyConfusionMatrix_Presentation(t *testing.T) {
 					x := findPointByName(dataset, predictionsO[i][j].(EuclidianPoint).name)
 					mat.Observe(test_nearest_neighbors[i][j].nodeId, x)
 				}
+				// TODO
+				// Sort deterministically
 			}
 
 			results[f_i][w_i] = mat.Accuracy()

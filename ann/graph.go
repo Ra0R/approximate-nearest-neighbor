@@ -203,6 +203,9 @@ func (g *Graph) NNInsert(object ObjectInterface, f uint16, w uint16) error {
 		}
 
 		for _, w := range nearestVertices {
+			if w == nil {
+				break
+			}
 			g.addEdge(v.id, w.id)
 		}
 	}
