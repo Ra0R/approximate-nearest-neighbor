@@ -10,16 +10,19 @@ import (
 	"github.com/emirpasic/gods/sets/treeset"
 )
 
+type DistanceFunction func(*Vertex, *Vertex) float64
+
 type Graph struct {
-	Path         string
-	nextVertexId uint64
-	vertices     map[uint64]*Vertex
-	edges        map[uint64][]*Edge
+	Path             string
+	nextVertexId     uint64
+	vertices         map[uint64]*Vertex
+	edges            map[uint64][]*Edge
+	distanceFunction DistanceFunction
 }
 
 type Vertex struct {
-	id     uint64
-	object *ObjectInterface
+	id          uint64
+	coordinates []float64
 }
 
 type Edge struct {
@@ -27,31 +30,22 @@ type Edge struct {
 	w uint64
 }
 
-func (g *Graph) NNSearch(object ObjectInterface, m uint16, k uint16) ([]*ObjectInterface, error) {
-	searchVertex := &Vertex{
-		id:     0,
-		object: &object,
-	}
+func (g *Graph) NNSearch(searchVertex *Vertex, m uint16, k uint16) ([]*Vertex, error) {
+
 	vertices, err := g.internalSearch(searchVertex, m, k)
 	if err != nil {
 		return nil, err
 	}
 
-	ret := make([]*ObjectInterface, k)
-	for i, v := range vertices {
-		if v == nil {
-			break
-		}
-		ret[i] = v.object
-	}
-
-	return ret, nil
+	return vertices, nil
 }
 
 func (g *Graph) internalSearch(q *Vertex, m uint16, k uint16) ([]*Vertex, error) {
 	comparator := &VertexComparator{
-		vertex: q,
+		vertex:           q,
+		distanceFunction: g.distanceFunction,
 	}
+
 	tempRes := treeset.NewWith(comparator.compare)
 	candidates := treeset.NewWith(comparator.compare)
 	visitedSet := treeset.NewWith(comparator.compare)
@@ -83,7 +77,7 @@ func (g *Graph) internalSearch(q *Vertex, m uint16, k uint16) ([]*Vertex, error)
 			// if c is further than k-th element from result, then break repeat
 			if tempRes.Size() >= int(k) {
 				kthResult := tempRes.Values()[k-1].(*Vertex)
-				if q.calculateDistance(c) > q.calculateDistance(kthResult) {
+				if q.calculateDistance(g, c) > q.calculateDistance(g, kthResult) {
 					break
 				}
 			}
@@ -175,11 +169,8 @@ func (g *Graph) addVertex(vertex *Vertex) {
 	g.nextVertexId++
 }
 
-func (g *Graph) NNInsert(object ObjectInterface, f uint16, w uint16) error {
-	v := &Vertex{
-		id:     g.nextVertexId,
-		object: &object,
-	}
+func (g *Graph) NNInsert(v *Vertex, f uint16, w uint16) error {
+	v.id = g.nextVertexId
 
 	g.edges[v.id] = make([]*Edge, 0)
 
@@ -236,8 +227,12 @@ func (g *Graph) getVertex(id uint64) (*Vertex, error) {
 	return nil, fmt.Errorf("Vertex %d not found in graph", id)
 }
 
-func (v *Vertex) calculateDistance(w *Vertex) float64 {
-	return (*v.object).calculateDistance(w.object)
+func (g *Graph) CalculateDistance(v, w *Vertex) float64 {
+	return g.distanceFunction(v, w)
+}
+
+func (v *Vertex) calculateDistance(g *Graph, w *Vertex) float64 {
+	return g.distanceFunction(v, w)
 }
 
 func (g *Graph) String() string {

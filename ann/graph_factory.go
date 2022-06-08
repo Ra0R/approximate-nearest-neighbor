@@ -3,6 +3,7 @@ package ann
 import (
 	"encoding/gob"
 	"errors"
+	"math"
 	"os"
 )
 
@@ -14,7 +15,16 @@ var (
 type GraphFactory struct {
 }
 
-func (gf *GraphFactory) New(path string) (GraphInterface, error) {
+func euclideanDistance(v *Vertex, w *Vertex) float64 {
+	var distance float64 = 0
+	for i := 0; i < len(v.coordinates); i++ {
+		// https://stackoverflow.com/a/58134438/14204586, might be faster without taking sqrt and it should not change behaviour
+		distance += math.Sqrt(math.Pow(v.coordinates[i]-w.coordinates[i], 2))
+	}
+	return distance
+}
+
+func (gf *GraphFactory) New(path string, distanceFunctionName string) (GraphInterface, error) {
 
 	// Create file if it not exists
 	file, err := os.OpenFile(path, os.O_RDONLY|os.O_CREATE, 0666)
@@ -24,11 +34,17 @@ func (gf *GraphFactory) New(path string) (GraphInterface, error) {
 		return nil, err
 	}
 
+	var distanceFunction func(*Vertex, *Vertex) float64
+	if distanceFunctionName == "euclidean" {
+		distanceFunction = euclideanDistance
+	}
+
 	return &Graph{
-		Path:         path,
-		nextVertexId: 0,
-		vertices:     make(map[uint64]*Vertex), // maps vertex id to the actual vertex
-		edges:        make(map[uint64][]*Edge), // maps vertex id to its edges
+		Path:             path,
+		nextVertexId:     0,
+		vertices:         make(map[uint64]*Vertex), // maps vertex id to the actual vertex
+		edges:            make(map[uint64][]*Edge), // maps vertex id to its edges
+		distanceFunction: distanceFunction,
 	}, nil
 }
 
