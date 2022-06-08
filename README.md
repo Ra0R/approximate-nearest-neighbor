@@ -1,6 +1,6 @@
 # Approximate nearest neighbor
 
-Golang implementation of approximate nearest neighbor based on navigable small world graphs [1] Checkout presentation for detailed explanation on use-cases and perfomance.
+Golang implementation of approximate nearest neighbor based on navigable small world graphs [1]. Checkout presentation for detailed explanation on use-cases and perfomance.
 
 [1]Y. Malkov, A. Ponomarenko, A. Logvinov, and V. Krylov, ‘Approximate nearest neighbor algorithm based on navigable small world graphs’, Information Systems, vol. 45, pp. 61–68, 2014.
 
