@@ -72,6 +72,7 @@ func TestSaveGraphReOpen(t *testing.T) {
 	// Reopen graph from disk
 	graph2, err := factory.Open(DEFAULT_PATH)
 
+	// TODO Encoding not finished yet
 	assert.Equal(graph.String(), graph2.String())
 
 	err = factory.Delete(DEFAULT_PATH)

@@ -24,9 +24,10 @@ func (gf *GraphFactory) New(path string, distanceFunctionName string) (GraphInte
 		return nil, err
 	}
 
-	var distanceFunction func(*Vertex, *Vertex) float64
-	if distanceFunctionName == "euclidean" {
-		distanceFunction = euclideanDistance
+	distanceFunction := getDistanceFunctionByName(distanceFunctionName)
+
+	if distanceFunction == nil {
+		panic("no distance function found " + distanceFunctionName)
 	}
 
 	return &Graph{
