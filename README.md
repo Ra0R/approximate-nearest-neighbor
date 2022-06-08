@@ -25,4 +25,4 @@ Offers a nice data set which contains n=200, 14 dimensional points.
 
 ### Lab 6
 
-- [ ] Distributed implemention with concurrent read and write access
+- [x] Optimized/Simplified implementation
