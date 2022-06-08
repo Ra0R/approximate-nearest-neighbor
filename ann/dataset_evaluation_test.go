@@ -74,7 +74,7 @@ func randomDataset(size int, dim int) []DataPoint {
 func findVertexById(dataset []DataPoint, id uint64) int {
 	r := -1
 	for j := range dataset {
-		if dataset[j].vertex.id == id {
+		if dataset[j].vertex.Id == id {
 			return j
 		}
 	}
@@ -177,7 +177,7 @@ func TestCalculateRecallAccuracyConfusionMatrix(t *testing.T) {
 			if len(predictionsO[i]) <= j {
 				continue
 			}
-			x := findVertexById(dataset, predictionsO[i][j].id)
+			x := findVertexById(dataset, predictionsO[i][j].Id)
 			mat.Observe(test_nearest_neighbors[i][j].nodeId, x)
 		}
 		if i > 0 && i%100 == 0 {
@@ -260,7 +260,7 @@ func TestCalculateRecallAccuracyConfusionMatrix_Presentation(t *testing.T) {
 					if len(predictionsO[i]) <= j {
 						continue
 					}
-					x := findVertexById(dataset, predictionsO[i][j].id)
+					x := findVertexById(dataset, predictionsO[i][j].Id)
 					mat.Observe(test_nearest_neighbors[i][j].nodeId, x)
 				}
 			}

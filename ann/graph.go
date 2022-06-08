@@ -13,21 +13,22 @@ import (
 type DistanceFunction func(*Vertex, *Vertex) float64
 
 type Graph struct {
-	Path             string
-	nextVertexId     uint64
-	vertices         map[uint64]*Vertex
-	edges            map[uint64][]*Edge
-	distanceFunction DistanceFunction
+	Path                 string
+	nextVertexId         uint64
+	vertices             map[uint64]*Vertex
+	edges                map[uint64][]*Edge
+	distanceFunctionName string
+	distanceFunction     DistanceFunction
 }
 
 type Vertex struct {
-	id          uint64
-	coordinates []float64
+	Id          uint64
+	Coordinates []float64
 }
 
 type Edge struct {
-	v uint64
-	w uint64
+	V uint64
+	W uint64
 }
 
 func (g *Graph) NNSearch(searchVertex *Vertex, m uint16, k uint16) ([]*Vertex, error) {
@@ -83,7 +84,7 @@ func (g *Graph) internalSearch(q *Vertex, m uint16, k uint16) ([]*Vertex, error)
 			}
 
 			// update list of candidates
-			friends, err := g.getFriends(c.id)
+			friends, err := g.getFriends(c.Id)
 			if err != nil {
 				return nil, err
 			}
@@ -131,14 +132,14 @@ func (g *Graph) getFriends(vertexId uint64) ([]*Vertex, error) {
 		if edge == nil {
 			break
 		}
-		if edge.v == vertexId {
-			w, err := g.getVertex(edge.w)
+		if edge.V == vertexId {
+			w, err := g.getVertex(edge.W)
 			if err != nil {
 				return nil, err
 			}
 			result = append(result, w)
 		} else {
-			v, err := g.getVertex(edge.v)
+			v, err := g.getVertex(edge.V)
 			if err != nil {
 				return nil, err
 			}
@@ -151,28 +152,28 @@ func (g *Graph) getFriends(vertexId uint64) ([]*Vertex, error) {
 
 func (g *Graph) addEdge(v, w uint64) {
 	e := &Edge{
-		v: v,
-		w: w,
+		V: v,
+		W: w,
 	}
 
 	g.edges[v] = append(g.edges[v], e)
 
 	e2 := &Edge{
-		v: w,
-		w: v,
+		V: w,
+		W: v,
 	}
 	g.edges[w] = append(g.edges[w], e2)
 }
 
 func (g *Graph) addVertex(vertex *Vertex) {
-	g.vertices[vertex.id] = vertex
+	g.vertices[vertex.Id] = vertex
 	g.nextVertexId++
 }
 
 func (g *Graph) NNInsert(v *Vertex, f uint16, w uint16) error {
-	v.id = g.nextVertexId
+	v.Id = g.nextVertexId
 
-	g.edges[v.id] = make([]*Edge, 0)
+	g.edges[v.Id] = make([]*Edge, 0)
 
 	// Empty Graph
 	if g.nextVertexId == 0 {
@@ -180,11 +181,11 @@ func (g *Graph) NNInsert(v *Vertex, f uint16, w uint16) error {
 		return nil
 	}
 
-	if v.id <= uint64(f) {
+	if v.Id <= uint64(f) {
 		// Connect previous nodes to newly inserted node
-		for i := uint64(0); i < v.id; i++ {
-			if v.id != i { // Do not add reflexiv edges
-				g.addEdge(v.id, uint64(i))
+		for i := uint64(0); i < v.Id; i++ {
+			if v.Id != i { // Do not add reflexiv edges
+				g.addEdge(v.Id, uint64(i))
 			}
 		}
 	} else {
@@ -197,7 +198,7 @@ func (g *Graph) NNInsert(v *Vertex, f uint16, w uint16) error {
 			if w == nil {
 				break
 			}
-			g.addEdge(v.id, w.id)
+			g.addEdge(v.Id, w.Id)
 		}
 	}
 
@@ -207,14 +208,43 @@ func (g *Graph) NNInsert(v *Vertex, f uint16, w uint16) error {
 }
 
 func (g *Graph) Close() error {
-	file, err := os.OpenFile(g.Path, os.O_RDWR, 0644)
+	// Persist vertices
+	file, err := os.OpenFile(g.Path+"vertices.ann", os.O_RDWR|os.O_CREATE, 0644)
+
 	defer file.Close()
 	if err != nil {
 		return err
 	}
 
+	file2, err := os.OpenFile(g.Path+"edges.ann", os.O_RDWR|os.O_CREATE, 0644)
+
+	defer file2.Close()
+	if err != nil {
+		return err
+	}
+
+	file3, err := os.OpenFile(g.Path+"graph.config", os.O_RDWR|os.O_CREATE, 0644)
+
+	defer file3.Close()
+	if err != nil {
+		return err
+	}
+	// Persist vertices
 	encoder := gob.NewEncoder(file)
-	err = encoder.Encode(*g)
+	err = encoder.Encode(g.vertices)
+
+	// Persist edges
+	encoder = gob.NewEncoder(file2)
+	err = encoder.Encode(g.edges)
+
+	// Persist config
+	config := GraphConfig{
+		NextVertexId:         g.nextVertexId,
+		Path:                 g.Path,
+		DistanceFunctionName: g.distanceFunctionName}
+
+	encoder = gob.NewEncoder(file3)
+	err = encoder.Encode(config)
 
 	return err
 }
@@ -238,11 +268,11 @@ func (v *Vertex) calculateDistance(g *Graph, w *Vertex) float64 {
 func (g *Graph) String() string {
 	s := ""
 	for i := 0; i < len(g.vertices); i++ {
-		s += "Vertice " + strconv.FormatUint(g.vertices[uint64(i)].id, 10)
+		s += "Vertice " + strconv.FormatUint(g.vertices[uint64(i)].Id, 10)
 		s += " -> "
-		near := g.edges[g.vertices[uint64(i)].id]
+		near := g.edges[g.vertices[uint64(i)].Id]
 		for j := 0; j < len(near); j++ {
-			s += strconv.FormatUint(near[j].w, 10) + " "
+			s += strconv.FormatUint(near[j].W, 10) + " "
 		}
 		s += "\n"
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	DEFAULT_PATH = ".\\testgraph.ann"
+	DEFAULT_PATH = ".\\testgraph\\"
 )
 
 func TestNewGraph(t *testing.T) {
@@ -29,7 +29,7 @@ func TestClose(t *testing.T) {
 	assert.NotNil(graph)
 	err = graph.Close()
 	assert.NoError(err)
-	err = factory.Delete(DEFAULT_PATH)
+	// err = factory.Delete(DEFAULT_PATH)
 	assert.NoError(err)
 }
 
@@ -67,7 +67,8 @@ func TestSaveGraphReOpen(t *testing.T) {
 	err = graph.NNInsert(&point2, 3, 1)
 	assert.NoError(err)
 
-	graph.Close()
+	err = graph.Close()
+	assert.NoError(err)
 
 	// Reopen graph from disk
 	graph2, err := factory.Open(DEFAULT_PATH)
