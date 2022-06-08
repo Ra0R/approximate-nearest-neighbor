@@ -3,7 +3,6 @@ package ann
 import (
 	"encoding/gob"
 	"errors"
-	"math"
 	"os"
 )
 
@@ -13,15 +12,6 @@ var (
 )
 
 type GraphFactory struct {
-}
-
-func euclideanDistance(v *Vertex, w *Vertex) float64 {
-	var distance float64 = 0
-	for i := 0; i < len(v.coordinates); i++ {
-		// https://stackoverflow.com/a/58134438/14204586, might be faster without taking sqrt and it should not change behaviour
-		distance += math.Sqrt(math.Pow(v.coordinates[i]-w.coordinates[i], 2))
-	}
-	return distance
 }
 
 func (gf *GraphFactory) New(path string, distanceFunctionName string) (GraphInterface, error) {

@@ -9,7 +9,7 @@ import (
 func TestLarger(t *testing.T) {
 	assert := assert.New(t)
 	vertex := Vertex{1, []float64{0}}
-	vertexComparator := &VertexComparator{vertex: &vertex}
+	vertexComparator := &VertexComparator{vertex: &vertex, distanceFunction: euclideanDistance}
 
 	vertex1 := Vertex{1, []float64{1}}
 	vertex2 := Vertex{1, []float64{2}}
