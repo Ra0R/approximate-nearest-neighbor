@@ -240,7 +240,7 @@ func (v *Vertex) calculateDistance(w *Vertex) float64 {
 	return (*v.object).calculateDistance(w.object)
 }
 
-func (g *Graph) String() {
+func (g *Graph) String() string {
 	s := ""
 	for i := 0; i < len(g.vertices); i++ {
 		s += "Vertice " + strconv.FormatUint(g.vertices[uint64(i)].id, 10)
@@ -252,4 +252,6 @@ func (g *Graph) String() {
 		s += "\n"
 	}
 	fmt.Println(s)
+
+	return s
 }

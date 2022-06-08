@@ -121,7 +121,7 @@ func TestInsertDatasetIntoGraph(t *testing.T) {
 		point := dataset[j]
 		graph.NNInsert(point, f, w)
 	}
-	graph.String()
+	_ = graph.String()
 }
 
 type neighbor struct {
@@ -203,7 +203,7 @@ func TestCalculateRecallAccuracyConfusionMatrix(t *testing.T) {
 		}
 	}
 
-	graph.String()
+	_ = graph.String()
 
 	mat := mlmetrics.NewConfusionMatrix()
 	for i := range test_nearest_neighbors {
@@ -261,6 +261,12 @@ func TestCalculateRecallAccuracyConfusionMatrix_Presentation(t *testing.T) {
 
 		// Take first k
 		test_nearest_neighbors[i] = distances[:k]
+
+		// Sort by id for evaluation
+		sort.Slice(test_nearest_neighbors[i], func(k, l int) bool {
+			return test_nearest_neighbors[i][k].nodeId < test_nearest_neighbors[i][l].nodeId
+		})
+
 	}
 
 	for w_i := range testsetW {
@@ -304,15 +310,16 @@ func TestCalculateRecallAccuracyConfusionMatrix_Presentation(t *testing.T) {
 
 			mat := mlmetrics.NewConfusionMatrix()
 			for i := range test_nearest_neighbors {
+
 				for j := range test_nearest_neighbors[i] {
 					if len(predictionsO[i]) <= j {
 						continue
 					}
 					x := findPointByName(dataset, predictionsO[i][j].(EuclidianPoint).name)
+
 					mat.Observe(test_nearest_neighbors[i][j].nodeId, x)
 				}
-				// TODO
-				// Sort deterministically
+
 			}
 
 			results[f_i][w_i] = mat.Accuracy()

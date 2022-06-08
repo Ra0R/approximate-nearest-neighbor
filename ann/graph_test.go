@@ -75,8 +75,7 @@ func TestSaveGraphReOpen(t *testing.T) {
 	// Reopen graph from disk
 	graph2, err := factory.Open(DEFAULT_PATH)
 
-	// TODO Manual encoding
-	graph2.String()
+	assert.Equal(graph.String(), graph2.String())
 
 	err = factory.Delete(DEFAULT_PATH)
 	assert.NoError(err)
@@ -100,7 +99,7 @@ func TestInsertionOnEmptyGraph(t *testing.T) {
 	err = graph.NNInsert(point, 3, 1)
 	assert.NoError(err)
 
-	graph.String()
+	_ = graph.String()
 
 	err = graph.Close()
 	assert.NoError(err)
@@ -144,7 +143,7 @@ func TestGetNearestNeighbor(t *testing.T) {
 	assert.NotNil(nearestNeighbors)
 	assert.Equal(0.0, point2.calculateDistance(nearestNeighbors[1]))
 
-	graph.String()
+	_ = graph.String()
 
 	err = graph.Close()
 	assert.NoError(err)
@@ -202,7 +201,7 @@ func TestGetNearestNeighbors(t *testing.T) {
 	assert.NotNil(nearestNeighbors)
 
 	// Assuming that they are ordered by distance (ascending)
-	graph.String()
+	_ = graph.String()
 	assert.Equal(point1.calculateDistance(nearestNeighbors[0]), 0.0)
 	assert.Equal(point2.calculateDistance(nearestNeighbors[1]), 0.0)
 	assert.Equal(point3.calculateDistance(nearestNeighbors[2]), 0.0)
@@ -231,5 +230,5 @@ func TestNNInsert(t *testing.T) {
 
 	err = graph.NNInsert(point1, 3, 1)
 	assert.NoError(err)
-	graph.String()
+	_ = graph.String()
 }
